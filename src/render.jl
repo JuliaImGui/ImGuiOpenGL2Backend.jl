@@ -77,29 +77,17 @@ function ImGui_ImplOpenGL2_RenderDrawData(ctx::Context, draw_data)
     # Render command lists
     data = unsafe_load(draw_data)
     cmd_lists = unsafe_wrap(Vector{Ptr{ImDrawList}}, data.CmdLists, data.CmdListsCount)
-    @show length(cmd_lists)
     for cmd_list in cmd_lists
         vtx_buffer = unsafe_load(cmd_list.VtxBuffer).Data
-        idx_buffer = unsafe_load(cmd_list.IdxBuffer).Data
-        vtx_size = unsafe_load(cmd_list.VtxBuffer).Size
-        idx_size = unsafe_load(cmd_list.IdxBuffer).Size
-        @show unsafe_load(cmd_list.VtxBuffer).Size
-        @show unsafe_load(cmd_list.IdxBuffer).Size
+        idx_buffer_offset = Csize_t(unsafe_load(cmd_list.IdxBuffer).Data)
+
         glVertexPointer(2, GL_FLOAT, sizeof(ImDrawVert), vtx_buffer + offsetof(ImDrawVert, Val(:pos)))
         glTexCoordPointer(2, GL_FLOAT, sizeof(ImDrawVert), vtx_buffer + offsetof(ImDrawVert, Val(:uv)))
         glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(ImDrawVert), vtx_buffer + offsetof(ImDrawVert, Val(:col)))
-        vptr = vtx_buffer
-        for i in 1:unsafe_load(cmd_list.VtxBuffer).Size
-            unsafe_load(vptr)
-            vptr += sizeof(ImDrawVert)
-        end
 
         cmd_buffer = cmd_list.CmdBuffer |> unsafe_load
-        @show cmd_buffer.Size
         for cmd_i = 0:(cmd_buffer.Size-1)
             pcmd = cmd_buffer.Data + cmd_i * sizeof(ImDrawCmd)
-            @show cmd_i
-            dump(unsafe_load(pcmd))
             cb_funcptr = unsafe_load(pcmd.UserCallback)
             if cb_funcptr != C_NULL
                 # User callback, registered via ImDrawList::AddCallback()
@@ -125,24 +113,11 @@ function ImGui_ImplOpenGL2_RenderDrawData(ctx::Context, draw_data)
                     glScissor(ix, iy, iz, iw)
                     # Bind texture, Draw
                     glBindTexture(GL_TEXTURE_2D, UInt(unsafe_load(pcmd.TextureId)))
-                    println("2:")
-                    elem_count = Int(unsafe_load(pcmd.ElemCount))
-                    @show elem_count
-                    ptr = idx_buffer + unsafe_load(pcmd.IdxOffset)
-                    for i in 1:idx_size
-                        idx = unsafe_load(ptr)
-                        if !(0 <= idx <= vtx_size-1)
-                            @warn "Invalid index: $idx vs. $vtx_size\nSkipping rest!"
-                            elem_count = fld(i-1, 3)
-                            break
-                        end
-                        ptr += sizeof(ImDrawIdx)
-                    end
-                    println("2.1")
-                    glDrawElements(GL_TRIANGLES, elem_count, sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, idx_buffer + unsafe_load(pcmd.IdxOffset))
-                    println("3")
+                    elem_count = unsafe_load(pcmd.ElemCount)
+                    glDrawElements(GL_TRIANGLES, GLsizei(elem_count), GL_UNSIGNED_SHORT, Ptr{Cvoid}(idx_buffer_offset))
                 end
             end
+            idx_buffer_offset += elem_count * sizeof(ImDrawIdx)
         end
     end
 
