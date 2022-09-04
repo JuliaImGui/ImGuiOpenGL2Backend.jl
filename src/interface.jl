@@ -21,10 +21,8 @@ const IMGUI_BACKEND_RENDERER_NAME = "imgui_impl_opengl2"
 function init(ctx::Context)
     io::Ptr{ImGuiIO} = igGetIO()
     io.BackendRendererName = pointer(IMGUI_BACKEND_RENDERER_NAME)
-    @show unsafe_load(io.BackendFlags) unsafe_load(io.BackendFlags) & ImGuiBackendFlags_RendererHasVtxOffset
     io.BackendFlags = unsafe_load(io.BackendFlags) & ~(ImGuiBackendFlags_RendererHasVtxOffset)  # version ≥ 320
-    #io.BackendFlags = unsafe_load(io.BackendFlags) | ImGuiBackendFlags_RendererHasViewports
-    @show unsafe_load(io.BackendFlags) unsafe_load(io.BackendFlags) & ImGuiBackendFlags_RendererHasVtxOffset
+    io.BackendFlags = unsafe_load(io.BackendFlags) | ImGuiBackendFlags_RendererHasViewports
 
     if unsafe_load(io.ConfigFlags) & ImGuiConfigFlags_ViewportsEnable == ImGuiConfigFlags_ViewportsEnable
         ImGui_ImplOpenGL2_InitPlatformInterface()
