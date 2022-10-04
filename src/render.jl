@@ -89,6 +89,7 @@ function ImGui_ImplOpenGL2_RenderDrawData(ctx::Context, draw_data)
         for cmd_i = 0:(cmd_buffer.Size-1)
             pcmd = cmd_buffer.Data + cmd_i * sizeof(ImDrawCmd)
             cb_funcptr = unsafe_load(pcmd.UserCallback)
+            elem_count = unsafe_load(pcmd.ElemCount)
             if cb_funcptr != C_NULL
                 # User callback, registered via ImDrawList::AddCallback()
                 # (ImDrawCallback_ResetRenderState is a special callback value used by the user to request the renderer to reset render state.)
@@ -113,7 +114,6 @@ function ImGui_ImplOpenGL2_RenderDrawData(ctx::Context, draw_data)
                     glScissor(ix, iy, iz, iw)
                     # Bind texture, Draw
                     glBindTexture(GL_TEXTURE_2D, UInt(unsafe_load(pcmd.TextureId)))
-                    elem_count = unsafe_load(pcmd.ElemCount)
                     glDrawElements(GL_TRIANGLES, GLsizei(elem_count), GL_UNSIGNED_SHORT, Ptr{Cvoid}(idx_buffer_offset))
                 end
             end
