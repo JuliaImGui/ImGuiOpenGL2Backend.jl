@@ -1,13 +1,13 @@
 name = "ImGuiOpenGL2Backend"
 uuid = "c105bd9b-9289-4129-acf4-4c081b46d160"
 authors = ["Julian P Samaroo <jpsamaroo@jpsamaroo.me>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 LibCImGui = "9be01004-c4f5-478b-abeb-cb32b114cf5e"
 ModernGL = "66fc600b-dfda-50eb-8b99-91cfa97b1301"
 
 [compat]
-LibCImGui = "1.82.2"
+LibCImGui = "~1.82"
 ModernGL = "1.1.5"
 julia = "1.6"
