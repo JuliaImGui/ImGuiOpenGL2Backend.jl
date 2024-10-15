@@ -1,3 +1,7 @@
+*This project is archived in favour of using the official backends: https://gnimuc.github.io/CImGui.jl/stable/backends/.
+If you really need OpenGL2 support consider modifying CImGuiPack_jll to also build the OpenGL2 backend and adding support
+for it to CImGui.jl.*
+
 # ImGuiOpenGLBackend
 
 [![CI](https://github.com/JuliaImGui/ImGuiOpenGLBackend.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/JuliaImGui/ImGuiOpenGLBackend.jl/actions/workflows/ci.yml)
